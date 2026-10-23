@@ -3,30 +3,28 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 let transporter: nodemailer.Transporter | null = null;
+let activeUser: string | undefined = process.env.ETHEREAL_USER || process.env.SMTP_USER;
+let activePass: string | undefined = process.env.ETHEREAL_PASS || process.env.SMTP_PASS;
 
-const getTransporter = () => {
-  if (transporter) return transporter;
-
-  const user = process.env.ETHEREAL_USER || process.env.SMTP_USER;
-  const pass = process.env.ETHEREAL_PASS || process.env.SMTP_PASS;
+const createTransporterWithCreds = (user?: string, pass?: string) => {
   const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
 
-  // ReachInbox pooled Ethereal transporter configuration
-  transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     pool: true,
     maxConnections: 5,
     maxMessages: 100,
     host,
     port,
     secure: port === 465,
-    connectionTimeout: 5000, // 5s timeout safeguard against blocked ISP ports
-    auth: {
-      user,
-      pass,
-    },
+    connectionTimeout: 10000,
+    auth: user && pass ? { user, pass } : undefined,
   });
+};
 
+const getTransporter = () => {
+  if (transporter) return transporter;
+  transporter = createTransporterWithCreds(activeUser, activePass);
   return transporter;
 };
 
@@ -54,28 +52,58 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
   }
 
   // 2. LOCALHOST METHOD (ReachInbox Ethereal Method):
-  // Uses ReachInbox's pooled Ethereal SMTP with persistent credentials configured in .env (ETHEREAL_USER / ETHEREAL_PASS).
-  console.log(`[LOCAL MODE] Dispatching email to <${to}> via ReachInbox Ethereal SMTP (${process.env.ETHEREAL_USER || 'auto'})...`);
+  // Uses pooled Ethereal SMTP with persistent credentials configured in .env.
+  // Automatically self-heals by provisioning a fresh Ethereal account if the configured one expires.
+  console.log(`[LOCAL MODE] Dispatching email to <${to}> via Ethereal SMTP (${activeUser || 'auto'})...`);
   
   try {
-    const mailer = getTransporter();
-    const sender = process.env.ETHEREAL_USER || process.env.SMTP_USER || 'hello@reachinbox.ai';
-    
-    const info = await mailer.sendMail({
-      from: `"ReachInbox" <${sender}>`,
-      to,
-      subject,
-      text,
-      html: text.replace(/\n/g, '<br>'),
-    });
+    let mailer = getTransporter();
+    let sender = activeUser || 'hello@reachinbox.ai';
 
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    console.log(`[LOCAL MODE] Successfully sent via ReachInbox Ethereal: %s`, info.messageId);
-    if (previewUrl) {
-      console.log(`[LOCAL MODE] Ethereal Preview URL: %s`, previewUrl);
+    try {
+      const info = await mailer.sendMail({
+        from: `"ReachInbox" <${sender}>`,
+        to,
+        subject,
+        text,
+        html: text.replace(/\n/g, '<br>'),
+      });
+
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      console.log(`[LOCAL MODE] Successfully sent via Ethereal: %s`, info.messageId);
+      if (previewUrl) {
+        console.log(`[LOCAL MODE] Ethereal Preview URL: %s`, previewUrl);
+      }
+      
+      return info;
+    } catch (smtpErr: any) {
+      // Auto-heal on 535 / Invalid login by provisioning a fresh real Ethereal test account
+      if (smtpErr.message?.includes('535') || smtpErr.message?.includes('Invalid login') || !activeUser) {
+        console.warn(`[ETHEREAL AUTO-HEAL] Ethereal credentials expired (${smtpErr.message}). Generating fresh Ethereal test account...`);
+        const newAccount = await nodemailer.createTestAccount();
+        console.log(`[ETHEREAL AUTO-HEAL] Fresh Ethereal account ready: ${newAccount.user}`);
+        activeUser = newAccount.user;
+        activePass = newAccount.pass;
+        transporter = createTransporterWithCreds(activeUser, activePass);
+
+        const retryInfo = await transporter.sendMail({
+          from: `"ReachInbox" <${activeUser}>`,
+          to,
+          subject,
+          text,
+          html: text.replace(/\n/g, '<br>'),
+        });
+
+        const previewUrl = nodemailer.getTestMessageUrl(retryInfo);
+        console.log(`[LOCAL MODE] Successfully sent via fresh Ethereal: %s`, retryInfo.messageId);
+        if (previewUrl) {
+          console.log(`[LOCAL MODE] Ethereal Preview URL: %s`, previewUrl);
+        }
+
+        return retryInfo;
+      }
+      throw smtpErr;
     }
-    
-    return info;
   } catch (error: any) {
     // Local network / ISP safeguard:
     // If the local network or ISP blocks port 587 (ETIMEDOUT / ECONNREFUSED) to smtp.ethereal.email,
