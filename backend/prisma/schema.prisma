@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  picture   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  emails    Email[]
+}
+
+model Email {
+  id           String    @id @default(uuid())
+  subject      String
+  body         String
+  to           String    // Can be comma-separated or stored as JSON, we'll keep it simple as string
+  from         String?
+  scheduledAt  DateTime
+  sentAt       DateTime?
+  status       String    @default("SCHEDULED") // SCHEDULED, SENT, FAILED
+  delay        Int       @default(0) // Delay between each email when sending in bulk (in seconds)
+  hourlyLimit  Int       @default(100) // Hourly limit for this job batch
+  
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
