@@ -1,5 +1,31 @@
 # ReachInbox Hiring Assignment – Full-stack Email Job Scheduler
 
+## 🚀 Quick Start (Run Locally with Docker)
+
+Run the entire application locally (PostgreSQL, Redis, Backend, and Frontend) with one command:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/rajsinghpiyush/Reach_in_box.git
+   cd Reach_in_box
+   ```
+
+2. **Start all services with Docker Compose:**
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Access the application:**
+   - **Frontend:** [http://localhost:5173](http://localhost:5173)
+   - **Backend API:** [http://localhost:5000](http://localhost:5000) (Health check: `http://localhost:5000/health`)
+
+To stop all services:
+```bash
+docker compose down
+```
+
+---
+
 ## Production Deployment & Testing
 
 If you are testing this application in a production environment (e.g., Render/Vercel) without a real SMTP server, it will automatically use **Ethereal Email**.
