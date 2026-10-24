@@ -9,7 +9,7 @@
     "module": "CommonJS",
     "esModuleInterop": true,
     "target": "esnext",
-    "types": [],
+    "noImplicitAny": false,
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

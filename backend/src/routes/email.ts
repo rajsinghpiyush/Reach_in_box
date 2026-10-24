@@ -134,7 +134,7 @@ router.post('/schedule', async (req: any, res: any) => {
   }
 
   try {
-    const scheduledEmails = [];
+    const scheduledEmails: any[] = [];
 
     // Base start time
     const startTime = new Date(scheduledAt).getTime();
