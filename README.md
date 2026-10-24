@@ -32,34 +32,44 @@ If you are testing this application in a production environment (e.g., Render/Ve
 - To view the sent Ethereal emails in production, simply open your **Browser Developer Tools -> Network Tab**, inspect the response for the `/emails/sent` API call, and you will see the `[Ethereal Preview URL]` appended directly to the email body! 
 - (Alternatively, you can just look at the email body in the "Sent" tab on the frontend dashboard).
 
-## Restoring Localhost Version
+## ⚙️ Local Environment Configuration (.env Examples)
 
-If you want to use this project strictly on **localhost** (before the production adjustments were made):
-1. If you want to revert the codebase to its original, pure localhost state, you can pull/checkout the very first commit.
-   - Commit Name/Hash: `a974a32 done with localhost test`
-   - Command: `git checkout a974a32` 
-   and then Make sure you have added all required environment variables in your local `.env` files.
+Create a `.env` file in both `backend/` and `frontend/` (or copy from the provided `.env.example` files). All values are pre-configured for local testing:
 
-**Backend `backend/.env`:**
+### **Backend (`backend/.env`):**
 ```env
 PORT=5000
+APP_ENV=local
+NODE_ENV=development
 DATABASE_URL="postgresql://reachinbox:reachinbox_password@localhost:5432/reachinbox_scheduler?schema=public"
 REDIS_HOST="localhost"
 REDIS_PORT=6379
+FRONTEND_URL="http://localhost:5173"
 
-# Google OAuth
+# Google OAuth (Optional - Mock Login works out-of-the-box without it)
 GOOGLE_CLIENT_ID=""
 
-# Worker configuration
-CONCURRENCY=1
-MAX_EMAILS_PER_HOUR=100
-MIN_DELAY_BETWEEN_EMAILS_MS=10000
+# Worker Configuration
+CONCURRENCY=5
+MAX_EMAILS_PER_HOUR=200
+MIN_DELAY_BETWEEN_EMAILS_MS=2000
+
+# Ethereal Email / SMTP (Optional - auto-generates test account dynamically if blank)
+SMTP_HOST="smtp.ethereal.email"
+SMTP_PORT=587
+SMTP_USER=""
+SMTP_PASS=""
 ```
 
-**Frontend `frontend/.env`:**
+### **Frontend (`frontend/.env`):**
 ```env
 VITE_BACKEND_URL="http://localhost:5000"
+
+# Google OAuth (Optional - Mock Login works out-of-the-box without it)
+VITE_GOOGLE_CLIENT_ID=""
 ```
+
+---
 
 ## Architecture Overview
 
