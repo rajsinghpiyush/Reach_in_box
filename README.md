@@ -47,7 +47,7 @@ REDIS_PORT=6379
 FRONTEND_URL="http://localhost:5173"
 
 # Google OAuth (Optional - Mock Login works out-of-the-box without it)
-GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_ID="enter your url"
 
 # Worker Configuration
 CONCURRENCY=5
@@ -66,7 +66,7 @@ SMTP_PASS=""
 VITE_BACKEND_URL="http://localhost:5000"
 
 # Google OAuth (Optional - Mock Login works out-of-the-box without it)
-VITE_GOOGLE_CLIENT_ID=""
+VITE_GOOGLE_CLIENT_ID="enter your url"
 ```
 
 ---
