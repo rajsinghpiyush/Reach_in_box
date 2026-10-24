@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let connectionOptions: any = {
+export let connectionOptions: any = {
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   maxRetriesPerRequest: null,
@@ -15,8 +15,8 @@ if (process.env.REDIS_URL) {
     host: url.hostname,
     port: parseInt(url.port || '6379'),
     username: url.username || undefined,
-    password: url.password || undefined,
-    tls: url.protocol === 'rediss:' ? {} : undefined,
+    password: url.password ? decodeURIComponent(url.password) : undefined,
+    tls: url.protocol === 'rediss:' ? { rejectUnauthorized: false } : undefined,
     maxRetriesPerRequest: null,
   };
 }

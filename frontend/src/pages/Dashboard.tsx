@@ -229,10 +229,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex font-sans selection:bg-emerald-200">
+    <div className="h-screen w-full bg-slate-50 text-slate-800 flex font-sans selection:bg-emerald-200 overflow-hidden">
       {/* Sidebar */}
-      <div className="w-[280px] bg-white border-r border-slate-200/60 flex flex-col pt-8 pb-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 relative">
-        <div className="px-8 mb-10 flex items-center justify-between">
+      <aside className="w-[280px] h-screen bg-white border-r border-slate-200/60 flex flex-col pt-8 pb-4 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 shrink-0 sticky top-0 overflow-hidden">
+        <div className="px-8 mb-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-md shadow-emerald-500/20 flex items-center justify-center">
               <span className="text-xl font-bold text-white tracking-tighter">O</span>
@@ -241,7 +241,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="px-6 mb-8">
+        <div className="px-6 mb-6 shrink-0">
           <div className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors group shadow-sm">
             <div className="flex items-center gap-3 overflow-hidden">
               {user?.picture ? (
@@ -262,7 +262,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="px-6 mb-6">
+        <div className="px-6 mb-6 shrink-0">
           <button 
             onClick={() => setShowCompose(true)}
             className="w-full py-3.5 border-2 border-emerald-500 text-emerald-600 rounded-2xl text-sm font-bold hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
@@ -271,7 +271,7 @@ const Dashboard = () => {
           </button>
         </div>
 
-        <div className="flex-1 px-4">
+        <div className="flex-1 px-4 overflow-y-auto min-h-0">
           <p className="text-[11px] font-bold text-slate-400 mb-4 px-4 uppercase tracking-widest">Navigation</p>
           <ul className="space-y-1.5">
             <li>
@@ -313,34 +313,36 @@ const Dashboard = () => {
           </ul>
         </div>
 
-        {/* 200 Hourly Limit Tracker Widget with Real-time Updates */}
-        <div className="p-4 mx-4 mb-2 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-sm">
-          <div className="flex justify-between items-center mb-1.5">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hourly Limit</p>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${stats.used >= stats.limit ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-100 text-emerald-800'}`}>
-              {stats.used >= stats.limit ? '200 Limit Hit' : 'Healthy'}
-            </span>
+        {/* 200 Hourly Limit Tracker Widget with Real-time Updates (Sticky at bottom) */}
+        <div className="mt-auto shrink-0 sticky bottom-0 bg-white pt-2 px-4 pb-2 z-10 border-t border-slate-100">
+          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl shadow-sm">
+            <div className="flex justify-between items-center mb-1.5">
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hourly Limit</p>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${stats.used >= stats.limit ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-100 text-emerald-800'}`}>
+                {stats.used >= stats.limit ? '200 Limit Hit' : 'Healthy'}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="text-xl font-black text-slate-800">{stats.used} <span className="text-xs font-semibold text-slate-400">/ {stats.limit}</span></span>
+              <span className="text-xs font-bold text-emerald-600">{Math.round((stats.used / (stats.limit || 200)) * 100)}%</span>
+            </div>
+            <div className="w-full bg-slate-200 rounded-full h-2 mb-2 overflow-hidden">
+              <div 
+                className={`h-2 rounded-full transition-all duration-700 ease-out ${stats.used >= stats.limit ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                style={{ width: `${Math.min(100, (stats.used / (stats.limit || 200)) * 100)}%` }}
+              ></div>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-tight">
+              {stats.used >= stats.limit 
+                ? '⚠️ 200 limit reached. Excess emails are rescheduled to next hour.' 
+                : `${stats.remaining} emails remaining in current hour window.`}
+            </p>
           </div>
-          <div className="flex items-baseline justify-between mb-2">
-            <span className="text-xl font-black text-slate-800">{stats.used} <span className="text-xs font-semibold text-slate-400">/ {stats.limit}</span></span>
-            <span className="text-xs font-bold text-emerald-600">{Math.round((stats.used / (stats.limit || 200)) * 100)}%</span>
-          </div>
-          <div className="w-full bg-slate-200 rounded-full h-2 mb-2 overflow-hidden">
-            <div 
-              className={`h-2 rounded-full transition-all duration-700 ease-out ${stats.used >= stats.limit ? 'bg-amber-500' : 'bg-emerald-500'}`} 
-              style={{ width: `${Math.min(100, (stats.used / (stats.limit || 200)) * 100)}%` }}
-            ></div>
-          </div>
-          <p className="text-[11px] text-slate-500 leading-tight">
-            {stats.used >= stats.limit 
-              ? '⚠️ 200 limit reached. Excess emails are rescheduled to next hour.' 
-              : `${stats.remaining} emails remaining in current hour window.`}
-          </p>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col relative z-0">
+      <main className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative z-0">
         {/* Header with Search and Real-time WebSocket Status */}
         <div className="h-24 bg-white/60 backdrop-blur-md border-b border-slate-200/60 flex items-center px-10 gap-6 sticky top-0 z-20">
           <div className="flex-1 flex items-center bg-white rounded-2xl px-5 py-3 max-w-3xl border border-slate-200 shadow-sm focus-within:shadow-md focus-within:border-emerald-300 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all duration-300">
@@ -474,7 +476,7 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* In-App Email Details & Preview Modal */}
       {viewingEmail && (

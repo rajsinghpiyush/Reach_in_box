@@ -2,7 +2,7 @@ import { Worker, Job, DelayedError } from 'bullmq';
 import dotenv from 'dotenv';
 import prisma from './prisma';
 import { sendEmail } from './services/email';
-import { redisClient, getHourBucket, getRateLimitKey, getRateLimitStats } from './redis';
+import { redisClient, getHourBucket, getRateLimitKey, getRateLimitStats, connectionOptions } from './redis';
 import {
   emitEmailSent,
   emitEmailFailed,
@@ -13,21 +13,7 @@ import {
 
 dotenv.config();
 
-let connection: any = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-};
-
-if (process.env.REDIS_URL) {
-  const url = new URL(process.env.REDIS_URL);
-  connection = {
-    host: url.hostname,
-    port: parseInt(url.port || '6379'),
-    username: url.username || undefined,
-    password: url.password || undefined,
-    tls: url.protocol === 'rediss:' ? {} : undefined,
-  };
-}
+const connection = connectionOptions;
 
 const concurrency = parseInt(process.env.CONCURRENCY || '5');
 const maxEmailsPerHour = parseInt(process.env.MAX_EMAILS_PER_HOUR || '200');
