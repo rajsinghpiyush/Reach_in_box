@@ -46,7 +46,7 @@ REDIS_HOST="localhost"
 REDIS_PORT=6379
 FRONTEND_URL="http://localhost:5173"
 
-# Google OAuth (Optional - Mock Login works out-of-the-box without it)
+# Give your Google Client ID / URL here (or use Mock Login on login page)
 GOOGLE_CLIENT_ID="enter your url"
 
 # Worker Configuration
@@ -65,9 +65,25 @@ SMTP_PASS=""
 ```env
 VITE_BACKEND_URL="http://localhost:5000"
 
-# Google OAuth (Optional - Mock Login works out-of-the-box without it)
+# Give your Google Client ID / URL here (or use Mock Login on login page)
 VITE_GOOGLE_CLIENT_ID="enter your url"
 ```
+
+### 🔑 Google OAuth Setup Instructions (Optional)
+
+You can sign in immediately using the **built-in Mock Login** on the login page without any Google setup.
+
+If you want to use official **Google Sign-In**:
+1. Go to the [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials).
+2. Create or open your **OAuth 2.0 Client ID** (Web application).
+3. Under **Authorized JavaScript origins**, add:
+   - Localhost: `http://localhost:5173`
+   - Production: `https://your-frontend.vercel.app` *(no trailing slash)*
+4. Under **Authorized redirect URIs**, add:
+   - `http://localhost:5173`
+   - `http://localhost:5173/login`
+   - `https://your-frontend.vercel.app/login`
+5. Paste your Client ID into `GOOGLE_CLIENT_ID` (`backend/.env`) and `VITE_GOOGLE_CLIENT_ID` (`frontend/.env`).
 
 ---
 
